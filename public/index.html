@@ -2,50 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BoB Music Player</title>
     <style>
         body { font-family: sans-serif; background: #121212; color: white; padding: 20px; text-align: center; }
-        input { padding: 10px; width: 70%; border-radius: 5px; border: none; }
-        button { padding: 10px 20px; background: #1DB954; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        input { padding: 12px; width: 70%; border-radius: 25px; border: none; outline: none; margin-bottom: 10px; }
+        button { padding: 12px 25px; background: #1DB954; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
         #results { list-style: none; padding: 0; margin-top: 20px; }
-        .song-item { background: #282828; margin: 10px auto; padding: 15px; border-radius: 8px; cursor: pointer; max-width: 500px; }
+        .song-item { background: #282828; margin: 10px auto; padding: 15px; border-radius: 12px; cursor: pointer; max-width: 500px; text-align: left; transition: 0.3s; }
+        .song-item:hover { background: #383838; }
+        audio { width: 100%; margin-top: 20px; filter: invert(100%); }
     </style>
 </head>
 <body>
+
     <h1>BoB Music Engine 🎧</h1>
-    <input type="text" id="query" placeholder="Search artist or song...">
+    
+    <input type="text" id="query" placeholder="Search for Jul, Lacrim, etc...">
     <button onclick="search()">Search</button>
 
     <div id="results"></div>
-    <audio id="player" controls autoplay style="width: 100%; margin-top: 20px;"></audio>
+    
+    <audio id="player" controls autoplay></audio>
 
     <script>
         async function search() {
             const q = document.getElementById("query").value;
             const resultsDiv = document.getElementById("results");
+            
+            if (!q) return;
             resultsDiv.innerHTML = "Searching...";
 
             try {
-                const res = await fetch(`https://inv.vern.cc/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
+                // BoB : Moteur de secours stable
+                const res = await fetch(`https://invidious.flokinet.is/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
                 const songs = await res.json();
                 
                 resultsDiv.innerHTML = "";
+                
+                if (songs.length === 0) {
+                    resultsDiv.innerHTML = "No results found.";
+                    return;
+                }
+
                 songs.forEach(song => {
                     const div = document.createElement("div");
                     div.className = "song-item";
                     div.innerHTML = `<strong>${song.title}</strong><br><small>${song.author}</small>`;
                     
                     div.onclick = () => {
-                        const audioUrl = `https://inv.vern.cc/latest_version?id=${song.videoId}&itag=140`;
-                        document.getElementById("player").src = audioUrl;
-                        document.getElementById("player").play();
+                        // Lien direct vers le flux audio (itag 140 = m4a)
+                        const audioUrl = `https://invidious.flokinet.is/latest_version?id=${song.videoId}&itag=140`;
+                        const player = document.getElementById("player");
+                        player.src = audioUrl;
+                        player.play();
                     };
                     resultsDiv.appendChild(div);
                 });
             } catch (e) {
-                resultsDiv.innerHTML = "Error: Server busy, try again.";
+                resultsDiv.innerHTML = "Server error. Please try again in a moment.";
             }
         }
     </script>
+
 </body>
 </html>
