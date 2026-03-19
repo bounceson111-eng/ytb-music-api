@@ -9,7 +9,7 @@
         input { padding: 12px; width: 70%; border-radius: 25px; border: none; outline: none; margin-bottom: 10px; }
         button { padding: 12px 25px; background: #1DB954; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
         #results { list-style: none; padding: 0; margin-top: 20px; }
-        .song-item { background: #282828; margin: 10px auto; padding: 15px; border-radius: 12px; cursor: pointer; max-width: 500px; text-align: left; transition: 0.3s; }
+        .song-item { background: #282828; margin: 10px auto; padding: 15px; border-radius: 12px; cursor: pointer; max-width: 500px; text-align: left; }
         .song-item:hover { background: #383838; }
         audio { width: 100%; margin-top: 20px; filter: invert(100%); }
     </style>
@@ -17,53 +17,39 @@
 <body>
 
     <h1>BoB Music Engine 🎧</h1>
-    
-    <input type="text" id="query" placeholder="Search for Jul, Lacrim, etc...">
+    <input type="text" id="query" placeholder="Search (Jul, Lacrim...)">
     <button onclick="search()">Search</button>
-
     <div id="results"></div>
-    
     <audio id="player" controls autoplay></audio>
 
     <script>
         async function search() {
             const q = document.getElementById("query").value;
             const resultsDiv = document.getElementById("results");
-            
             if (!q) return;
             resultsDiv.innerHTML = "Searching...";
 
             try {
-                // BoB : Moteur de secours stable
+                // BoB : Nouveau moteur flokinet (très stable)
                 const res = await fetch(`https://invidious.flokinet.is/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
                 const songs = await res.json();
-                
                 resultsDiv.innerHTML = "";
                 
-                if (songs.length === 0) {
-                    resultsDiv.innerHTML = "No results found.";
-                    return;
-                }
-
                 songs.forEach(song => {
                     const div = document.createElement("div");
                     div.className = "song-item";
                     div.innerHTML = `<strong>${song.title}</strong><br><small>${song.author}</small>`;
-                    
                     div.onclick = () => {
-                        // Lien direct vers le flux audio (itag 140 = m4a)
                         const audioUrl = `https://invidious.flokinet.is/latest_version?id=${song.videoId}&itag=140`;
-                        const player = document.getElementById("player");
-                        player.src = audioUrl;
-                        player.play();
+                        document.getElementById("player").src = audioUrl;
+                        document.getElementById("player").play();
                     };
                     resultsDiv.appendChild(div);
                 });
             } catch (e) {
-                resultsDiv.innerHTML = "Server error. Please try again in a moment.";
+                resultsDiv.innerHTML = "Server busy. Try again in 5 seconds.";
             }
         }
     </script>
-
 </body>
 </html>
