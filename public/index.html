@@ -1,47 +1,51 @@
 <!DOCTYPE html>
-<html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>YouTube Music Search</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BoB Music Player</title>
     <style>
-      body { font-family: sans-serif; padding: 20px; }
-      li { margin: 10px 0; padding: 10px; background: #f4f4f4; border-radius: 5px; list-style: none; }
+        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; text-align: center; }
+        input { padding: 10px; width: 70%; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; background: #1DB954; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #results { list-style: none; padding: 0; margin-top: 20px; }
+        .song-item { background: #282828; margin: 10px auto; padding: 15px; border-radius: 8px; cursor: pointer; max-width: 500px; }
     </style>
-  </head>
-  <body>
-    <h1>Rechercher et écouter de la musique</h1>
-    <input type="text" id="query" placeholder="Entrez le nom de la chanson..." />
-    <button onclick="search()">Recherche</button>
+</head>
+<body>
+    <h1>BoB Music Engine 🎧</h1>
+    <input type="text" id="query" placeholder="Search artist or song...">
+    <button onclick="search()">Search</button>
 
-    <ul id="results"></ul>
-
+    <div id="results"></div>
     <audio id="player" controls autoplay style="width: 100%; margin-top: 20px;"></audio>
 
     <script>
-      async function search() {
-        const q = document.getElementById("query").value;
-        // BoB : On utilise un moteur de secours direct
-        const res = await fetch(`https://inv.vern.cc/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
-        const songs = await res.json();
+        async function search() {
+            const q = document.getElementById("query").value;
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = "Searching...";
 
-        const list = document.getElementById("results");
-        list.innerHTML = "";
-
-        songs.forEach((song) => {
-          const li = document.createElement("li");
-          li.textContent = `${song.title} - ${song.author}`;
-          li.style.cursor = "pointer";
-
-          li.onclick = () => {
-            // BoB : Lien audio direct indestructible (itag 140 = audio m4a)
-            const audioUrl = `https://inv.vern.cc/latest_version?id=${song.videoId}&itag=140`;
-            document.getElementById("player").src = audioUrl;
-            document.getElementById("player").play();
-          };
-
-          list.appendChild(li);
-        });
-      }
+            try {
+                const res = await fetch(`https://inv.vern.cc/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
+                const songs = await res.json();
+                
+                resultsDiv.innerHTML = "";
+                songs.forEach(song => {
+                    const div = document.createElement("div");
+                    div.className = "song-item";
+                    div.innerHTML = `<strong>${song.title}</strong><br><small>${song.author}</small>`;
+                    
+                    div.onclick = () => {
+                        const audioUrl = `https://inv.vern.cc/latest_version?id=${song.videoId}&itag=140`;
+                        document.getElementById("player").src = audioUrl;
+                        document.getElementById("player").play();
+                    };
+                    resultsDiv.appendChild(div);
+                });
+            } catch (e) {
+                resultsDiv.innerHTML = "Error: Server busy, try again.";
+            }
+        }
     </script>
-  </body>
+</body>
 </html>
