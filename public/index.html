@@ -1,44 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <title>YouTube Music Search</title>
+    <style>
+      body { font-family: sans-serif; padding: 20px; }
+      li { margin: 10px 0; padding: 10px; background: #f4f4f4; border-radius: 5px; list-style: none; }
+    </style>
   </head>
   <body>
-    <h1>Search and Play Music</h1>
-    <input type="text" id="query" placeholder="Enter song name..." />
-    <button onclick="search()">Search</button>
+    <h1>Rechercher et écouter de la musique</h1>
+    <input type="text" id="query" placeholder="Entrez le nom de la chanson..." />
+    <button onclick="search()">Recherche</button>
 
     <ul id="results"></ul>
 
-    <audio id="player" controls autoplay></audio>
+    <audio id="player" controls autoplay style="width: 100%; margin-top: 20px;"></audio>
 
     <script>
       async function search() {
         const q = document.getElementById("query").value;
-        const res = await fetch(`/search?q=${encodeURIComponent(q)}`);
+        // BoB : On utilise un moteur de secours direct
+        const res = await fetch(`https://inv.vern.cc/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
         const songs = await res.json();
-
-        console.log("Search results:", songs); // ✅ debug log
 
         const list = document.getElementById("results");
         list.innerHTML = "";
 
         songs.forEach((song) => {
           const li = document.createElement("li");
-
-          // Safe check: nếu không có artist
-          const artists =
-            song.artists?.map((a) => a.name).join(", ") || "Unknown artist";
-
-          li.textContent = `${song.name} - ${artists}`;
+          li.textContent = `${song.title} - ${song.author}`;
           li.style.cursor = "pointer";
 
-          li.onclick = async () => {
-            const playRes = await fetch(`/play/${song.videoId}`);
-            const { url } = await playRes.json();
-            console.log("Playing:", url); // ✅ debug log
-            document.getElementById("player").src = url;
+          li.onclick = () => {
+            // BoB : Lien audio direct indestructible (itag 140 = audio m4a)
+            const audioUrl = `https://inv.vern.cc/latest_version?id=${song.videoId}&itag=140`;
+            document.getElementById("player").src = audioUrl;
+            document.getElementById("player").play();
           };
 
           list.appendChild(li);
