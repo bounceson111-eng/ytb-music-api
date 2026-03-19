@@ -6,18 +6,16 @@
     <title>BoB Music Player</title>
     <style>
         body { font-family: sans-serif; background: #121212; color: white; padding: 20px; text-align: center; }
-        input { padding: 12px; width: 70%; border-radius: 25px; border: none; outline: none; margin-bottom: 10px; }
+        input { padding: 12px; width: 80%; border-radius: 25px; border: none; outline: none; margin-bottom: 10px; max-width: 400px; }
         button { padding: 12px 25px; background: #1DB954; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
-        #results { list-style: none; padding: 0; margin-top: 20px; }
+        #results { margin-top: 20px; }
         .song-item { background: #282828; margin: 10px auto; padding: 15px; border-radius: 12px; cursor: pointer; max-width: 500px; text-align: left; }
-        .song-item:hover { background: #383838; }
-        audio { width: 100%; margin-top: 20px; filter: invert(100%); }
+        audio { width: 100%; margin-top: 20px; }
     </style>
 </head>
 <body>
-
     <h1>BoB Music Engine 🎧</h1>
-    <input type="text" id="query" placeholder="Search (Jul, Lacrim...)">
+    <input type="text" id="query" placeholder="Artiste ou musique...">
     <button onclick="search()">Search</button>
     <div id="results"></div>
     <audio id="player" controls autoplay></audio>
@@ -25,30 +23,40 @@
     <script>
         async function search() {
             const q = document.getElementById("query").value;
-            const resultsDiv = document.getElementById("results");
+            const resDiv = document.getElementById("results");
             if (!q) return;
-            resultsDiv.innerHTML = "Searching...";
+            resDiv.innerHTML = "Searching...";
 
-            try {
-                // BoB : Nouveau moteur flokinet (très stable)
-                const res = await fetch(`https://invidious.flokinet.is/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
-                const songs = await res.json();
-                resultsDiv.innerHTML = "";
-                
-                songs.forEach(song => {
-                    const div = document.createElement("div");
-                    div.className = "song-item";
-                    div.innerHTML = `<strong>${song.title}</strong><br><small>${song.author}</small>`;
-                    div.onclick = () => {
-                        const audioUrl = `https://invidious.flokinet.is/latest_version?id=${song.videoId}&itag=140`;
-                        document.getElementById("player").src = audioUrl;
-                        document.getElementById("player").play();
-                    };
-                    resultsDiv.appendChild(div);
-                });
-            } catch (e) {
-                resultsDiv.innerHTML = "Server busy. Try again in 5 seconds.";
+            // On utilise une liste de secours au cas où l'un des serveurs sature
+            const instances = [
+                "https://invidious.flokinet.is",
+                "https://invidious.drgns.space",
+                "https://inv.vern.cc"
+            ];
+
+            let success = false;
+            for (let url of instances) {
+                if (success) break;
+                try {
+                    const res = await fetch(`${url}/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
+                    const songs = await res.json();
+                    
+                    resDiv.innerHTML = "";
+                    songs.forEach(song => {
+                        const div = document.createElement("div");
+                        div.className = "song-item";
+                        div.innerHTML = `<strong>${song.title}</strong><br><small>${song.author}</small>`;
+                        div.onclick = () => {
+                            document.getElementById("player").src = `${url}/latest_version?id=${song.videoId}&itag=140`;
+                        };
+                        resDiv.appendChild(div);
+                    });
+                    success = true;
+                } catch (e) {
+                    console.log("Serveur suivant...");
+                }
             }
+            if (!success) resDiv.innerHTML = "Tous les serveurs sont occupés, réessaie.";
         }
     </script>
 </body>
