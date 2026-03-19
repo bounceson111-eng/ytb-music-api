@@ -1,114 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>BoB Music | Ghost Bypass</title>
+    <title>BoB Music | Full Stream</title>
     <style>
-        body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #00ff00; text-align: center; padding: 20px; }
-        .console { background: #000; border: 1px solid #00ff00; padding: 15px; margin: 20px auto; max-width: 600px; text-align: left; font-size: 0.8rem; height: 150px; overflow-y: auto; }
-        input { padding: 12px; width: 60%; background: #111; border: 1px solid #00ff00; color: #00ff00; }
-        button { padding: 12px 20px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; }
-        .track { background: #111; padding: 10px; margin: 10px auto; border: 1px solid #333; max-width: 600px; cursor: pointer; text-align: left; }
-        .track:hover { border-color: #00ff00; }
+        body { font-family: sans-serif; background: #000; color: #fff; text-align: center; padding: 20px; }
+        .search-area { position: sticky; top: 0; background: #000; padding: 20px; z-index: 10; }
+        input { padding: 15px; width: 60%; border-radius: 25px; border: 1px solid #333; background: #111; color: #fff; }
+        button { padding: 15px 25px; border-radius: 25px; border: none; background: #1DB954; color: #000; font-weight: bold; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: #181818; padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .card:hover { background: #282828; transform: scale(1.05); }
+        img { width: 100%; border-radius: 5px; }
+        #player-container { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #121212; border-top: 2px solid #1DB954; display: none; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
 
-    <h1>BOB_GHOST_ENGINE v5.0</h1>
-    <input type="text" id="query" placeholder="SCAN_TARGET (Jul, Lacrim...)">
-    <button onclick="ghostSearch()">EXECUTE BYPASS</button>
-
-    <div class="console" id="log">
-        [SYSTEM] En attente d'instruction...
+    <div class="search-area">
+        <h1>BoB FULL ENGINE 🎧</h1>
+        <input type="text" id="query" placeholder="Artiste ou Musique (ex: Jul)...">
+        <button onclick="searchFull()">SCAN</button>
     </div>
 
-    <div id="results"></div>
-    <audio id="player" controls autoplay style="width:100%; margin-top:20px;"></audio>
+    <div id="results" class="grid"></div>
+
+    <div id="player-container">
+        <div id="yt-player"></div>
+    </div>
 
     <script>
-        const log = (m, c='#00ff00') => {
-            const l = document.getElementById('log');
-            l.innerHTML += `<br><span style="color:${c}">[${new Date().toLocaleTimeString()}] ${m}</span>`;
-            l.scrollTop = l.scrollHeight;
-        };
-
-        async function ghostSearch() {
+        async function searchFull() {
             const q = document.getElementById('query').value;
             const resDiv = document.getElementById('results');
             if(!q) return;
 
-            resDiv.innerHTML = "";
-            log("INITIATING GHOST PROTOCOL...", "#ffff00");
-            log("MASQUAGE IP : Simulation via Resident Proxy...");
-            log("USER-AGENT : Emulation Chrome/120.0 (Windows 11)...");
+            resDiv.innerHTML = "Connexion sécurisée aux bases de données...";
 
-            // On utilise des instances API qui sont connues pour mieux "tourner" les IPs
-            const nodes = [
-                "https://pipedapi.kavin.rocks",
-                "https://api.piped.victr.me",
-                "https://pipedapi.leptons.xyz"
-            ];
-
-            let success = false;
-
-            for (let node of nodes) {
-                log(`TENTATIVE D'ENTRÉE : ${node.split('//')[1]}`, "#00ccff");
-                try {
-                    const res = await fetch(`${node}/search?q=${encodeURIComponent(q)}&filter=music_songs`, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest' // Fait croire à une requête AJAX locale
-                        }
-                    });
-
-                    if (res.status === 403) {
-                        log(`BLOCAGE DETECTÉ : YouTube a reconnu le bot sur ce node.`, "#ff0000");
-                        continue;
-                    }
-
-                    const data = await res.json();
-                    if (data.items && data.items.length > 0) {
-                        log(`FAILLE TROUVÉE ! ${data.items.length} résultats décryptés.`, "#00ff00");
-                        render(data.items);
-                        success = true;
-                        break;
-                    }
-                } catch (e) {
-                    log(`TIMEOUT : Node injoignable.`, "#ff0000");
-                }
-            }
-
-            if (!success) log("ECHEC CRITIQUE : Toutes les routes sont grillées. YouTube a patché la faille.", "#ff0000");
-        }
-
-        function render(items) {
-            const d = document.getElementById('results');
-            items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'track';
-                div.innerHTML = `<strong>${item.title}</strong><br><small>${item.uploaderName}</small>`;
-                div.onclick = () => playGhost(item.url.split('=')[1]);
-                d.appendChild(div);
-            });
-        }
-
-        async function playGhost(id) {
-            log(`DÉCHIFFREMENT DU FLUX : ID ${id}...`, "#ffff00");
             try {
-                // Utilisation d'un Proxy de streaming direct
-                const streamUrl = `https://pipedapi.kavin.rocks/streams/${id}`;
-                const res = await fetch(streamUrl);
+                // Utilisation de l'API iTunes (Zéro blocage)
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=20&country=fr`);
                 const data = await res.json();
-                const audio = data.audioStreams.find(s => s.format === "M4A");
-                
-                if (audio) {
-                    log("FLUX STABILISÉ. LECTURE EN COURS.", "#00ff00");
-                    document.getElementById('player').src = audio.url;
-                }
+
+                resDiv.innerHTML = "";
+                data.results.forEach(song => {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.innerHTML = `
+                        <img src="${song.artworkUrl100.replace('100x100', '400x400')}">
+                        <p><strong>${song.trackName}</strong><br><small>${song.artistName}</small></p>
+                    `;
+                    // Au clic, on cherche le son sur YouTube et on l'affiche
+                    div.onclick = () => loadVideo(song.trackName + " " + song.artistName);
+                    resDiv.appendChild(div);
+                });
             } catch (e) {
-                log("ERREUR DE STREAM : Lien expiré ou banni.", "#ff0000");
+                resDiv.innerHTML = "Erreur de scanner. Réessaie.";
             }
+        }
+
+        function loadVideo(searchTerm) {
+            const container = document.getElementById('player-container');
+            container.style.display = "block";
+            
+            // On utilise un moteur de recherche DuckDuckGo pour trouver l'ID YouTube sans API Key
+            const ytSearchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(searchTerm)}`;
+            container.innerHTML = `<iframe src="${ytSearchUrl}&autoplay=1" allow="autoplay"></iframe>`;
         }
     </script>
 </body>
