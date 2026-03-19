@@ -1,133 +1,114 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOB_STEALTH_CORE v4.0</title>
+    <title>BoB Music | Ghost Bypass</title>
     <style>
-        body { font-family: 'Courier New', monospace; background: #050505; color: #00ff00; padding: 20px; margin: 0; overflow-x: hidden; }
-        .matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.1; pointer-events: none; }
-        .terminal-header { border-bottom: 2px solid #00ff00; padding: 10px; margin-bottom: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
-        .input-zone { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
-        input { background: #000; border: 1px solid #00ff00; color: #00ff00; padding: 12px; width: 60%; font-family: 'Courier New'; outline: none; box-shadow: 0 0 5px #00ff00; }
-        button { background: #00ff00; color: #000; border: none; padding: 12px 25px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
-        button:hover { background: #00cc00; box-shadow: 0 0 15px #00ff00; }
-        .console { background: rgba(0, 0, 0, 0.9); border: 1px solid #333; height: 180px; overflow-y: auto; padding: 15px; font-size: 0.85rem; margin-bottom: 20px; text-align: left; }
-        .log-info { color: #00ff00; }
-        .log-warn { color: #ffff00; }
-        .log-error { color: #ff0000; font-weight: bold; text-decoration: underline; }
-        .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-        .track-card { background: #111; border: 1px solid #222; padding: 15px; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
-        .track-card:hover { border-color: #00ff00; background: #1a1a1a; transform: translateY(-3px); }
-        .track-card::after { content: "DECRYPT"; position: absolute; right: -20px; bottom: 5px; font-size: 0.6rem; opacity: 0.3; transform: rotate(-45deg); }
-        audio { width: 100%; margin-top: 20px; filter: invert(1) hue-rotate(90deg); }
+        body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #00ff00; text-align: center; padding: 20px; }
+        .console { background: #000; border: 1px solid #00ff00; padding: 15px; margin: 20px auto; max-width: 600px; text-align: left; font-size: 0.8rem; height: 150px; overflow-y: auto; }
+        input { padding: 12px; width: 60%; background: #111; border: 1px solid #00ff00; color: #00ff00; }
+        button { padding: 12px 20px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; }
+        .track { background: #111; padding: 10px; margin: 10px auto; border: 1px solid #333; max-width: 600px; cursor: pointer; text-align: left; }
+        .track:hover { border-color: #00ff00; }
     </style>
 </head>
 <body>
 
-    <div class="terminal-header">Target: YouTube_Database | Status: Bypassing_Firewall</div>
+    <h1>BOB_GHOST_ENGINE v5.0</h1>
+    <input type="text" id="query" placeholder="SCAN_TARGET (Jul, Lacrim...)">
+    <button onclick="ghostSearch()">EXECUTE BYPASS</button>
 
-    <div class="input-zone">
-        <input type="text" id="target" placeholder="[SCAN_QUERY] Entrez artiste ou titre...">
-        <button onclick="initiateHack()">Execute Scan</button>
+    <div class="console" id="log">
+        [SYSTEM] En attente d'instruction...
     </div>
 
-    <div class="console" id="monitor">
-        [SYS] En attente d'injection...<br>
-        [NET] Proxy Vercel Edge : Operationnel.
-    </div>
-
-    <div id="results" class="results-grid"></div>
-    
-    <div style="position: sticky; bottom: 0; background: #000; padding: 10px; border-top: 1px solid #00ff00;">
-        <audio id="streamer" controls></audio>
-    </div>
+    <div id="results"></div>
+    <audio id="player" controls autoplay style="width:100%; margin-top:20px;"></audio>
 
     <script>
-        const NODES = [
-            "https://pipedapi.kavin.rocks",
-            "https://api.piped.victr.me",
-            "https://pipedapi.drgns.space",
-            "https://pipedapi.moomoo.me"
-        ];
+        const log = (m, c='#00ff00') => {
+            const l = document.getElementById('log');
+            l.innerHTML += `<br><span style="color:${c}">[${new Date().toLocaleTimeString()}] ${m}</span>`;
+            l.scrollTop = l.scrollHeight;
+        };
 
-        function monitor(msg, type = 'info') {
-            const m = document.getElementById("monitor");
-            const time = new Date().toLocaleTimeString();
-            const cls = `log-${type}`;
-            m.innerHTML += `<br><span class="${cls}">[${time}] ${msg}</span>`;
-            m.scrollTop = m.scrollHeight;
-        }
-
-        async function initiateHack() {
-            const query = document.getElementById("target").value;
-            const resDiv = document.getElementById("results");
-            if (!query) return;
+        async function ghostSearch() {
+            const q = document.getElementById('query').value;
+            const resDiv = document.getElementById('results');
+            if(!q) return;
 
             resDiv.innerHTML = "";
-            monitor("Injection User-Agent: Mozilla/5.0 (Android 13; Mobile)...", "warn");
-            monitor("Rotation d'IP via Nodes décentralisés...", "info");
+            log("INITIATING GHOST PROTOCOL...", "#ffff00");
+            log("MASQUAGE IP : Simulation via Resident Proxy...");
+            log("USER-AGENT : Emulation Chrome/120.0 (Windows 11)...");
+
+            // On utilise des instances API qui sont connues pour mieux "tourner" les IPs
+            const nodes = [
+                "https://pipedapi.kavin.rocks",
+                "https://api.piped.victr.me",
+                "https://pipedapi.leptons.xyz"
+            ];
 
             let success = false;
 
-            for (let node of NODES) {
-                monitor(`Tentative d'intrusion : ${node.split('//')[1]}`, "info");
+            for (let node of nodes) {
+                log(`TENTATIVE D'ENTRÉE : ${node.split('//')[1]}`, "#00ccff");
                 try {
-                    const response = await fetch(`${node}/search?q=${encodeURIComponent(query)}&filter=music_songs`);
-                    
-                    if (response.status === 403) {
-                        monitor(`BLOCAGE DETECTE (403) : Node ${node} banni par YouTube.`, "error");
+                    const res = await fetch(`${node}/search?q=${encodeURIComponent(q)}&filter=music_songs`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest' // Fait croire à une requête AJAX locale
+                        }
+                    });
+
+                    if (res.status === 403) {
+                        log(`BLOCAGE DETECTÉ : YouTube a reconnu le bot sur ce node.`, "#ff0000");
                         continue;
                     }
 
-                    const data = await response.json();
+                    const data = await res.json();
                     if (data.items && data.items.length > 0) {
-                        monitor(`FAILLE TROUVEE : ${data.items.length} paquets récupérés.`, "info");
-                        displayData(data.items);
+                        log(`FAILLE TROUVÉE ! ${data.items.length} résultats décryptés.`, "#00ff00");
+                        render(data.items);
                         success = true;
                         break;
                     }
                 } catch (e) {
-                    monitor(`ECHEC CONNEXION : Node hors-ligne.`, "error");
+                    log(`TIMEOUT : Node injoignable.`, "#ff0000");
                 }
             }
 
-            if (!success) {
-                monitor("SYSTEM CRITICAL ERROR : YouTube a détecté le bypass. Attendre 300s.", "error");
-            }
+            if (!success) log("ECHEC CRITIQUE : Toutes les routes sont grillées. YouTube a patché la faille.", "#ff0000");
         }
 
-        function displayData(items) {
-            const resDiv = document.getElementById("results");
+        function render(items) {
+            const d = document.getElementById('results');
             items.forEach(item => {
-                const card = document.createElement("div");
-                card.className = "track-card";
-                card.innerHTML = `<strong>${item.title}</strong><br><small>${item.uploaderName}</small>`;
-                card.onclick = () => decryptStream(item.url.split("=")[1]);
-                resDiv.appendChild(card);
+                const div = document.createElement('div');
+                div.className = 'track';
+                div.innerHTML = `<strong>${item.title}</strong><br><small>${item.uploaderName}</small>`;
+                div.onclick = () => playGhost(item.url.split('=')[1]);
+                d.appendChild(div);
             });
         }
 
-        async function decryptStream(id) {
-            monitor(`Déchiffrement du flux ID: ${id}...`, "warn");
-            for (let node of NODES) {
-                try {
-                    const res = await fetch(`${node}/streams/${id}`);
-                    const data = await res.json();
-                    const audio = data.audioStreams.find(s => s.format === "M4A" || s.codec === "opus");
-                    
-                    if (audio) {
-                        monitor("FLUX STABILISE : Lecture en cours.", "info");
-                        const player = document.getElementById("streamer");
-                        player.src = audio.url;
-                        player.play();
-                        return;
-                    }
-                } catch (e) {
-                    monitor("Echec extraction, tentative node suivant...", "warn");
+        async function playGhost(id) {
+            log(`DÉCHIFFREMENT DU FLUX : ID ${id}...`, "#ffff00");
+            try {
+                // Utilisation d'un Proxy de streaming direct
+                const streamUrl = `https://pipedapi.kavin.rocks/streams/${id}`;
+                const res = await fetch(streamUrl);
+                const data = await res.json();
+                const audio = data.audioStreams.find(s => s.format === "M4A");
+                
+                if (audio) {
+                    log("FLUX STABILISÉ. LECTURE EN COURS.", "#00ff00");
+                    document.getElementById('player').src = audio.url;
                 }
+            } catch (e) {
+                log("ERREUR DE STREAM : Lien expiré ou banni.", "#ff0000");
             }
-            monitor("ECHEC TOTAL : YouTube Signature V3 a bloqué ce titre.", "error");
         }
     </script>
 </body>
